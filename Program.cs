@@ -1,9 +1,7 @@
 using ListerSS.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using System.Text;
 
 namespace ListerSS
@@ -15,16 +13,11 @@ namespace ListerSS
             var builder = WebApplication.CreateBuilder(args);
             //builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
+            builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddAuthorization(
-            //    options =>
-            //{
-            //    options.AddPolicy("Name", policy =>
-            //        policy.RequireClaim("Name"));
-            //}
-            );
+            builder.Services.AddAuthorization();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -53,6 +46,7 @@ namespace ListerSS
                         }
                     };
                 });
+
             builder.Services.AddSignalR(options => new HubOptions()
             {
                 EnableDetailedErrors = true,
