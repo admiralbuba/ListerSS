@@ -24,7 +24,7 @@ namespace ListerSS.SignalR
 
         public async Task SendGroup(HubMessage message)
         {
-            await Clients.Group(message.ToName).SendAsync("ReceiveGroup", message.Text);
+            await Clients.Group(message.ToName).SendAsync("ReceiveGroup", message);
         }
 
         public override async Task OnConnectedAsync()
