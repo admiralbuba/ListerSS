@@ -34,6 +34,7 @@ namespace ListerSS.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
+                    new Claim("Id", name),
                     new Claim("Name", name)
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
@@ -43,9 +44,8 @@ namespace ListerSS.Controllers
             };
 
             var token = new JwtSecurityTokenHandler().CreateToken(tokenDescriptor);
-            var handler = new JwtSecurityTokenHandler();
 
-            return new Token(handler.WriteToken(token));
+            return new Token(new JwtSecurityTokenHandler().WriteToken(token));
         }
     }
     public record Token(string Bearer);

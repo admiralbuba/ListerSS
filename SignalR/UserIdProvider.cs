@@ -6,7 +6,7 @@ namespace ListerSS.SignalR
     {
         public virtual string? GetUserId(HubConnectionContext connection)
         {
-            return connection.User?.FindFirst("Name")?.Value;
+            return connection.User?.FindFirst("Id")?.Value;
         }
     }
 }
