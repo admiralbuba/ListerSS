@@ -1,23 +1,15 @@
 using ListerSS.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace ListerSS
 {
     public class Program
     {
-        public static Func<MessageReceivedContext, Task> JwtEventHandler = context =>
-        {
-            var token = context.Request.Query["access_token"];
-
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/chat"))
-            {
-                context.Token = token;
-            }
-            return Task.CompletedTask;
-        };
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -26,26 +18,45 @@ namespace ListerSS
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddSignalR();
+            builder.Services.AddAuthorization(
+            //    options =>
+            //{
+            //    options.AddPolicy("Name", policy =>
+            //        policy.RequireClaim("Name"));
+            //}
+            );
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
+                        ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
-                        ValidIssuer = "MyServer",
                         ValidateAudience = true,
+                        ValidIssuer = "MyServer",
                         ValidAudience = "MyClient",
-                        ValidateLifetime = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecretKey")),
-                        ValidateIssuerSigningKey = true
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("SecretKey_SecretKey_SecretKey")),
                     };
 
                     options.Events = new JwtBearerEvents
                     {
-                        OnMessageReceived = JwtEventHandler
+                        OnMessageReceived = context =>
+                        {
+                            var token = context.Request.Headers["Authorization"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/chat"))
+                            {
+                                context.Token = token.ToString().Replace("Bearer ", "");
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
+            builder.Services.AddSignalR(options => new HubOptions()
+            {
+                EnableDetailedErrors = true,
+            });
 
             var app = builder.Build();
 
@@ -56,7 +67,7 @@ namespace ListerSS
             }
 
             app.UseAuthorization();
-            app.UseAuthorization();
+            app.UseAuthentication();
 
 
             app.MapControllers();

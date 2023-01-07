@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,6 +19,7 @@ namespace ListerSS.Controllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("auth")]
         public async Task<ActionResult<Token>> Auth(string name)
@@ -25,21 +27,25 @@ namespace ListerSS.Controllers
             if (!names.Contains(name))
                 return BadRequest("User does not exist");
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecretKey_SecretKey_SecretKey"));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("SecretKey_SecretKey_SecretKey"));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim(ClaimTypes.NameIdentifier, name)
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim("Name", name)
+                }),
+                Expires = DateTime.UtcNow.AddDays(1),
+                Issuer = "MyServer",
+                Audience = "MyClient",
+                SigningCredentials = credentials
             };
-            var token = new JwtSecurityToken("MyServer",
-                "MyClient",
-                claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: credentials);
 
-            var res = new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityTokenHandler().CreateToken(tokenDescriptor);
+            var handler = new JwtSecurityTokenHandler();
 
-            return new Token(res);
+            return new Token(handler.WriteToken(token));
         }
     }
     public record Token(string Bearer);
