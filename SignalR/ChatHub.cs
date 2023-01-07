@@ -12,15 +12,14 @@ namespace ListerSS.SignalR
             var user = Context.User.FindFirstValue("Id");
             if (user is not null)
             {
-                await Clients.Users(message.ToName, user).SendAsync("Receive", message.Text);
+                await Clients.Users(message.ToName, user).SendAsync("Receive", message);
             }
         }
 
         public async Task Enter(HubMessage message)
         {
-            var username = Context.User.FindFirstValue("Name");
             await Groups.AddToGroupAsync(Context.ConnectionId, message.ToName);
-            await Clients.Group(message.ToName).SendAsync("Notify", $"{username} joined the group {message.ToName}");
+            await Clients.Group(message.ToName).SendAsync("Notify", $"{message.FromName} joined the group {message.ToName}");
         }
 
         public async Task SendGroup(HubMessage message)

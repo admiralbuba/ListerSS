@@ -47,10 +47,7 @@ namespace ListerSS
                     };
                 });
 
-            builder.Services.AddSignalR(options => new HubOptions()
-            {
-                EnableDetailedErrors = true,
-            });
+            builder.Services.AddSignalR(options => options.AddFilter(new DataFilter()));
 
             var app = builder.Build();
 
