@@ -7,7 +7,7 @@ namespace ListerSS.SignalR
     public class ChatHub : Hub
     {
         //[Authorize]
-        public async Task Send(HubMessage message)
+        public async Task ReceiveMessage(HubMessage message)
         {
             var user = Context.User.FindFirstValue("Id");
             if (user is not null)
@@ -16,13 +16,13 @@ namespace ListerSS.SignalR
             }
         }
 
-        public async Task Enter(HubMessage message)
+        public async Task EnterGroup(HubMessage message)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, message.ToName);
             await Clients.Group(message.ToName).SendAsync("Notify", $"{message.FromName} joined the group {message.ToName}");
         }
 
-        public async Task SendGroup(HubMessage message)
+        public async Task SendToGroup(HubMessage message)
         {
             await Clients.Group(message.ToName).SendAsync("ReceiveGroup", message);
         }

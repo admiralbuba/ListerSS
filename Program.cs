@@ -1,3 +1,4 @@
+using ListerSS.Configuration;
 using ListerSS.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -11,7 +12,9 @@ namespace ListerSS
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            //builder.WebHost.UseUrls("http://0.0.0.0:8080");
+
+            ConfigHelper.Authentication = builder.Configuration.GetSection("Authentication").Get<Authentication>();
+            ConfigHelper.Logging = builder.Configuration.GetSection("Logging").Get<Logging>();
 
             builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
@@ -26,9 +29,9 @@ namespace ListerSS
                         ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
                         ValidateAudience = true,
-                        ValidIssuer = "MyServer",
-                        ValidAudience = "MyClient",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("SecretKey_SecretKey_SecretKey")),
+                        ValidIssuer = ConfigHelper.Authentication.ValidIssuer,
+                        ValidAudience = ConfigHelper.Authentication.ValidAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(ConfigHelper.Authentication.SecretKey)),
                     };
 
                     options.Events = new JwtBearerEvents
@@ -59,7 +62,6 @@ namespace ListerSS
 
             app.UseAuthorization();
             app.UseAuthentication();
-
 
             app.MapControllers();
             app.MapHub<ChatHub>("/chat");
