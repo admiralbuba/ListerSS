@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ListerSS.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("login")]
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;

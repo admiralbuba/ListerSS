@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace ListerSS.SignalR
 {
@@ -6,7 +7,7 @@ namespace ListerSS.SignalR
     {
         public virtual string? GetUserId(HubConnectionContext connection)
         {
-            return connection.User?.FindFirst("Id")?.Value;
+            return connection.User?.FindFirst(ClaimTypes.Name)?.Value;
         }
     }
 }

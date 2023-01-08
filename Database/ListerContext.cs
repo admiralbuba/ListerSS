@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ListerSS.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace ListerSS.Database
 {
@@ -14,11 +16,18 @@ namespace ListerSS.Database
             Database.EnsureCreated();
         }
 
-        //public DbSet<user> Users { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Data Source=listerSS.db");
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<User>()
+            //    .Property(b => b.Groups)
+            //    .Ke();
         }
     }
 }

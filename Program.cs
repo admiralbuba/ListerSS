@@ -1,7 +1,9 @@
 using ListerSS.Configuration;
+using ListerSS.Database;
 using ListerSS.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -18,6 +20,7 @@ namespace ListerSS
 
             builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
+            builder.Services.AddDbContext<ListerContext>(opt => opt.UseSqlite());
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,7 +52,9 @@ namespace ListerSS
                     };
                 });
             builder.Services.AddAuthorization();
-            builder.Services.AddSignalR(options => options.AddFilter(new DataFilter()));
+            builder.Services.AddSignalR(options => options.AddFilter<DataFilter>());
+            builder.Services.AddAutoMapper(typeof(Program));
+            //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             var app = builder.Build();
 
@@ -59,7 +64,7 @@ namespace ListerSS
                 app.UseSwaggerUI();
             }
 
-            app.UsePathBase("/api");
+            //app.UsePathBase("/api");
             app.UseAuthorization();
             app.UseAuthentication();
 

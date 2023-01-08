@@ -1,36 +1,39 @@
-﻿using ListerSS.Models;
+﻿using ListerSS.Database;
+using ListerSS.Dto;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace ListerSS.SignalR
 {
-    public class ChatHub : Hub
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class ChatHub : Hub<IChatHub>
     {
-        [Authorize]
-        public async Task Send(HubMessage message)
+        private readonly ListerContext _db;
+        public ChatHub(ListerContext db)
         {
-            var user = Context.User.FindFirstValue(ClaimTypes.Name);
-            if (user is not null)
-            {
-                await Clients.Users(message.ToName, user).SendAsync("Receive", message);
-            }
+            _db = db;
+        }
+        public async Task Send(MessageDto message)
+        {
+            await Clients.Users(message.ToName).Receive(message);
         }
 
-        public async Task Enter(HubMessage message)
+        public async Task Enter(string groupName)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, message.ToName);
-            await Clients.Group(message.ToName).SendAsync("Notify", $"{message.FromName} joined the group {message.ToName}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            await Clients.Group(groupName).Notify($"{Context.User.FindFirstValue(ClaimTypes.Name)} joined the group {groupName}");
         }
 
-        public async Task SendGroup(HubMessage message)
+        public async Task SendGroup(MessageDto message)
         {
-            await Clients.Group(message.ToName).SendAsync("ReceiveGroup", message);
+            await Clients.OthersInGroup(message.ToName).ReceiveGroup(message);
         }
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("Notify", $"Greetings {Context.User.FindFirstValue(ClaimTypes.Name)}");
+            await Clients.All.Notify($"Greetings {Context.User.FindFirstValue(ClaimTypes.Name)}");
             await base.OnConnectedAsync();
         }
     }
