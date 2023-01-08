@@ -10,7 +10,7 @@ namespace ListerSS.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;
-        private List<string> names = new List<string>() { "qwe", "ewq" };
+        private List<string> names = new List<string>() { "qwe", "ewq", "Katy", "Dua" };
 
         public LoginController(ILogger<LoginController> logger)
         {
@@ -19,8 +19,8 @@ namespace ListerSS.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("auth")]
-        public async Task<ActionResult<Token>> Auth(string name)
+        [Route("authentication")]
+        public async Task<ActionResult<Token>> Authenticate(string name)
         {
             if (!names.Contains(name))
                 return BadRequest("User does not exist");

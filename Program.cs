@@ -20,7 +20,6 @@ namespace ListerSS
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddAuthorization();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -49,7 +48,7 @@ namespace ListerSS
                         }
                     };
                 });
-
+            builder.Services.AddAuthorization();
             builder.Services.AddSignalR(options => options.AddFilter(new DataFilter()));
 
             var app = builder.Build();
@@ -60,6 +59,7 @@ namespace ListerSS
                 app.UseSwaggerUI();
             }
 
+            app.UsePathBase("/api");
             app.UseAuthorization();
             app.UseAuthentication();
 
