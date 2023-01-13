@@ -1,11 +1,15 @@
 using ListerSS.Configuration;
 using ListerSS.Database;
+using ListerSS.Models.Response;
 using ListerSS.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Text;
+using System.Text.Json;
 
 namespace ListerSS
 {
@@ -20,13 +24,14 @@ namespace ListerSS
 
             builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
             builder.Services.AddDbContext<ListerContext>(opt => opt.UseSqlite());
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+                .AddJwtBearer(opt =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    opt.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
@@ -36,7 +41,7 @@ namespace ListerSS
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(ConfigHelper.Authentication.SecretKey)),
                     };
 
-                    options.Events = new JwtBearerEvents
+                    opt.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
@@ -54,7 +59,6 @@ namespace ListerSS
             builder.Services.AddAuthorization();
             builder.Services.AddSignalR(options => options.AddFilter<DataFilter>());
             builder.Services.AddAutoMapper(typeof(Program));
-            //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             var app = builder.Build();
 
@@ -64,7 +68,25 @@ namespace ListerSS
                 app.UseSwaggerUI();
             }
 
-            //app.UsePathBase("/api");
+            app.UseExceptionHandler(err =>
+            {
+                err.Run(async context =>
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "application/json";
+
+                    var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    if (contextFeature != null)
+                    {
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse()
+                        {
+                            StatusCode = context.Response.StatusCode,
+                            Message = contextFeature.Error.Message//"Internal Server Error."
+                        }));
+                    }
+                });
+            });
+
             app.UseAuthorization();
             app.UseAuthentication();
 

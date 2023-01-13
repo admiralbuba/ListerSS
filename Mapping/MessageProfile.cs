@@ -1,16 +1,15 @@
 ﻿using AutoMapper;
-using ListerSS.Dto;
 using ListerSS.Models;
+using ListerSS.Models.Response;
 
-namespace ListerSS.Configuration
+namespace ListerSS.Mapping
 {
     public class MessageProfile : Profile
     {
         public MessageProfile()
         {
-            CreateMap<MessageDto, HubMessage>();
-            CreateMap<HubMessage, MessageDto>();
+            CreateMap<MessageResponse, HubMessage>()
+                .ReverseMap();
         }
-
     }
 }

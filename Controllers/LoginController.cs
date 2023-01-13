@@ -1,7 +1,9 @@
+using ListerSS.Database;
 using ListerSS.Models;
 using ListerSS.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ListerSS.Controllers
 {
@@ -10,11 +12,12 @@ namespace ListerSS.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;
-        private List<string> names = new List<string>() { "qwe", "ewq", "Katy", "Dua" };
+        private readonly ListerContext _db;
 
-        public LoginController(ILogger<LoginController> logger)
+        public LoginController(ILogger<LoginController> logger, ListerContext db)
         {
             _logger = logger;
+            _db = db;
         }
 
         [AllowAnonymous]
@@ -22,7 +25,8 @@ namespace ListerSS.Controllers
         [Route("authentication")]
         public async Task<ActionResult<Token>> Authenticate(string name)
         {
-            if (!names.Contains(name))
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Name == name);
+            if (user == null)
                 return BadRequest("User does not exist");
 
             return new Token(JwtUtils.CreateToken(name));

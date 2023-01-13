@@ -1,12 +1,11 @@
-﻿using ListerSS.Dto;
-using ListerSS.Models;
+﻿using ListerSS.Models.Response;
 
 namespace ListerSS.SignalR
 {
     public interface IChatHub
     {
-        Task Receive(MessageDto message);
+        Task Receive(MessageResponse message);
         Task Notify(string groupName);
-        Task ReceiveGroup(MessageDto message);
+        Task ReceiveGroup(MessageResponse message);
     }
 }

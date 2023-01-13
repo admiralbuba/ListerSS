@@ -13,10 +13,12 @@ namespace ListerSS.Database
         public ListerContext(DbContextOptions<ListerContext> options)
             : base(options)
         {
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Group> Groups { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -25,9 +27,12 @@ namespace ListerSS.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<User>()
-            //    .Property(b => b.Groups)
-            //    .Ke();
+            modelBuilder.Entity<User>().HasData(
+                new User { Id = Guid.NewGuid(), Name = "qwe" },
+                new User { Id = Guid.NewGuid(), Name = "ewq" },
+                new User { Id = Guid.NewGuid(), Name = "Katy" },
+                new User { Id = Guid.NewGuid(), Name = "Dua" }
+                );
         }
     }
 }

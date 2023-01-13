@@ -1,8 +1,10 @@
 ﻿using ListerSS.Database;
-using ListerSS.Dto;
+using ListerSS.Models.Response;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace ListerSS.SignalR
@@ -10,12 +12,14 @@ namespace ListerSS.SignalR
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChatHub : Hub<IChatHub>
     {
+        private readonly IConnectionMultiplexer _redis;
         private readonly ListerContext _db;
-        public ChatHub(ListerContext db)
+        public ChatHub(ListerContext db, IConnectionMultiplexer redis)
         {
             _db = db;
+            _redis = redis;
         }
-        public async Task Send(MessageDto message)
+        public async Task Send(MessageResponse message)
         {
             await Clients.Users(message.ToName).Receive(message);
         }
@@ -26,14 +30,21 @@ namespace ListerSS.SignalR
             await Clients.Group(groupName).Notify($"{Context.User.FindFirstValue(ClaimTypes.Name)} joined the group {groupName}");
         }
 
-        public async Task SendGroup(MessageDto message)
+        public async Task SendGroup(MessageResponse message)
         {
             await Clients.OthersInGroup(message.ToName).ReceiveGroup(message);
         }
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.Notify($"Greetings {Context.User.FindFirstValue(ClaimTypes.Name)}");
+            var name = Context.User.FindFirstValue(ClaimTypes.Name);
+            var user = await _db.Users.FindAsync();
+            await _redis.GetDatabase().HashSetAsync(user.Id.ToString(), new HashEntry[]
+            {
+                new HashEntry("ConnectionId", Context.ConnectionId),
+                new HashEntry("ConnectedAt", DateTime.UtcNow.ToString())
+                });
+            await Clients.All.Notify($"Greetings {name}");
             await base.OnConnectedAsync();
         }
     }

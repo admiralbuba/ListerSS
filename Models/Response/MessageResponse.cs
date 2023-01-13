@@ -1,11 +1,11 @@
-﻿namespace ListerSS.Dto
+﻿namespace ListerSS.Models.Response
 {
-    public class MessageDto
+    public class MessageResponse
     {
         public string ToName { get; set; }
         public string Text { get; set; }
 
-        public MessageDto(string toName, string text)
+        public MessageResponse(string toName, string text)
         {
             ToName = toName;
             Text = text;

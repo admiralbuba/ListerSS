@@ -15,7 +15,7 @@ namespace ListerSS.Utils
 
             var claims = new List<Claim>
             {
-                new Claim("Id", Guid.NewGuid().ToString()),
+                //new Claim("Id", Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Name, value)
             };
             var jwt = new JwtSecurityToken(
