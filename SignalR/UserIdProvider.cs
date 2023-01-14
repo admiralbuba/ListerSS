@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
-namespace ListerSS.SignalR
+namespace Lister.WebApi.SignalR
 {
     public class UserIdProvider : IUserIdProvider
     {

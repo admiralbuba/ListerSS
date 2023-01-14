@@ -1,13 +1,12 @@
-﻿using ListerSS.Database;
-using ListerSS.Models.Response;
+﻿using Lister.Persistence.Database;
+using Lister.WebApi.Models.Response;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Security.Claims;
 
-namespace ListerSS.SignalR
+namespace Lister.WebApi.SignalR
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChatHub : Hub<IChatHub>

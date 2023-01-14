@@ -1,4 +1,4 @@
-﻿namespace ListerSS.Models.Response
+﻿namespace Lister.WebApi.Models.Response
 {
     public class ErrorResponse
     {

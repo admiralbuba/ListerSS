@@ -1,4 +1,4 @@
-﻿namespace ListerSS.Configuration
+﻿namespace Lister.WebApi.Configuration
 {
     public class Logging
     {

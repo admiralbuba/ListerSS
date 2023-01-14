@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
-using ListerSS.Models;
+using Lister.Domain.Models;
+using Lister.WebApi.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
-namespace ListerSS.SignalR
+namespace Lister.WebApi.SignalR
 {
     public class DataFilter : IHubFilter
     {
@@ -20,7 +21,7 @@ namespace ListerSS.SignalR
             if (invocationContext.HubMethodArguments.SingleOrDefault() is HubMessage message)
             {
                 //var message = _mapper.Map<HubMessage>(messageDto);
-                message.Id = Guid.NewGuid();
+                //message.Id = Guid.NewGuid();
                 message.FromName = invocationContext.Context.User.FindFirstValue("Name");
                 message.CreatedAt = DateTime.Now;
                 var arguments = invocationContext.HubMethodArguments.ToArray();

@@ -1,6 +1,6 @@
-﻿using ListerSS.Models.Response;
+﻿using Lister.WebApi.Models.Response;
 
-namespace ListerSS.SignalR
+namespace Lister.WebApi.SignalR
 {
     public interface IChatHub
     {

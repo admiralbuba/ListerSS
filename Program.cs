@@ -1,7 +1,7 @@
-using ListerSS.Configuration;
-using ListerSS.Database;
-using ListerSS.Models.Response;
-using ListerSS.SignalR;
+using Lister.Persistence.Database;
+using Lister.WebApi.Configuration;
+using Lister.WebApi.Models.Response;
+using Lister.WebApi.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
@@ -11,7 +11,7 @@ using StackExchange.Redis;
 using System.Text;
 using System.Text.Json;
 
-namespace ListerSS
+namespace Lister.WebApi
 {
     public class Program
     {
@@ -24,7 +24,7 @@ namespace ListerSS
 
             builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
-            builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
+            //builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
             builder.Services.AddDbContext<ListerContext>(opt => opt.UseSqlite());
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

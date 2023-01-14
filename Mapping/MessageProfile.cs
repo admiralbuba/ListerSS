@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
-using ListerSS.Models;
-using ListerSS.Models.Response;
+using Lister.Domain.Models;
+using Lister.WebApi.Models.Response;
 
-namespace ListerSS.Mapping
+namespace Lister.WebApi.Mapping
 {
     public class MessageProfile : Profile
     {
         public MessageProfile()
         {
             CreateMap<MessageResponse, HubMessage>()
+                .ReverseMap();
+            CreateMap<Group, CreateGroupResponse>()
+                .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.Users.Select(x => x.Guid).ToList()))
                 .ReverseMap();
         }
     }
