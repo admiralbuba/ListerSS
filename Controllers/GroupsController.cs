@@ -41,9 +41,6 @@ namespace Lister.WebApi.Controllers
         [Route("create")]
         public async Task<ActionResult<CreateGroupResponse>> Create(CreateGroupRequest request)
         {
-            //var userId = HttpContext.User.FindFirstValue("Id");
-            //request.Users.Add(Guid.Parse(userId));
-
             var users = _db.Users.Where(x => request.Users.Contains(x.Guid)).ToList();
 
             var group = new Group() { Name = request.Name, Users = users };

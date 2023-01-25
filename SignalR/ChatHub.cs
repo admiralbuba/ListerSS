@@ -3,8 +3,10 @@ using Lister.WebApi.Models.Response;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace Lister.WebApi.SignalR
 {
@@ -37,14 +39,27 @@ namespace Lister.WebApi.SignalR
         public override async Task OnConnectedAsync()
         {
             var name = Context.User.FindFirstValue(ClaimTypes.Name);
-            var user = await _db.Users.FindAsync();
-            await _redis.GetDatabase().HashSetAsync(user.Id.ToString(), new HashEntry[]
+            var guid = Context.User.FindFirstValue("Id");
+
+            await _redis.GetDatabase().HashSetAsync(guid, new HashEntry[]
             {
                 new HashEntry("ConnectionId", Context.ConnectionId),
                 new HashEntry("ConnectedAt", DateTime.UtcNow.ToString())
                 });
+
             await Clients.All.Notify($"Greetings {name}");
             await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception ex)
+        {
+            var name = Context.User.FindFirstValue(ClaimTypes.Name);
+            var guid = Context.User.FindFirstValue("Id");
+
+            await _redis.GetDatabase().KeyDeleteAsync(guid);
+
+            await Clients.All.Notify($"{name} disconnected");
+            await base.OnDisconnectedAsync(ex);
         }
     }
 }
