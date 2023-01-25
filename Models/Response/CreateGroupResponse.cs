@@ -4,6 +4,6 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public ICollection<Guid> Users { get; set; }
+        public List<Guid> Users { get; set; }
     }
 }

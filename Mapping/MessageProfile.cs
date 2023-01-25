@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Lister.Domain.Models;
 using Lister.WebApi.Models.Response;
+using Lister.WebApi.SignalR;
 
 namespace Lister.WebApi.Mapping
 {
@@ -8,7 +9,7 @@ namespace Lister.WebApi.Mapping
     {
         public MessageProfile()
         {
-            CreateMap<MessageResponse, HubMessage>()
+            CreateMap<Message, HubMessage>()
                 .ReverseMap();
             CreateMap<Group, CreateGroupResponse>()
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.Users.Select(x => x.Guid).ToList()))

@@ -24,7 +24,7 @@ namespace Lister.WebApi
             var authOpts = builder.Configuration.GetSection("Authentication").Get<Authentication>();
 
             builder.Services.AddControllers();
-            builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
+            builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect(builder.Configuration["RedisUrl"]));
             builder.Services.AddDbContext<ListerContext>(opt => opt.UseSqlite());
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>

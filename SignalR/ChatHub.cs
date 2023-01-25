@@ -20,7 +20,7 @@ namespace Lister.WebApi.SignalR
             _db = db;
             _redis = redis;
         }
-        public async Task Send(MessageResponse message)
+        public async Task Send(Message message)
         {
             await Clients.Users(message.ToName).Receive(message);
         }
@@ -31,7 +31,7 @@ namespace Lister.WebApi.SignalR
             await Clients.Group(groupName).Notify($"{Context.User.FindFirstValue(ClaimTypes.Name)} joined the group {groupName}");
         }
 
-        public async Task SendGroup(MessageResponse message)
+        public async Task SendGroup(Message message)
         {
             await Clients.OthersInGroup(message.ToName).ReceiveGroup(message);
         }

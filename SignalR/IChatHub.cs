@@ -4,8 +4,8 @@ namespace Lister.WebApi.SignalR
 {
     public interface IChatHub
     {
-        Task Receive(MessageResponse message);
+        Task Receive(Message message);
         Task Notify(string groupName);
-        Task ReceiveGroup(MessageResponse message);
+        Task ReceiveGroup(Message message);
     }
 }
