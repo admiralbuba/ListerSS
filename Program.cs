@@ -1,12 +1,14 @@
 using Lister.Persistence.Database;
 using Lister.WebApi.Configuration;
 using Lister.WebApi.Models.Response;
+using Lister.WebApi.Services;
 using Lister.WebApi.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Text;
 using System.Text.Json;
@@ -19,15 +21,38 @@ namespace Lister.WebApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            ConfigHelper.Authentication = builder.Configuration.GetSection("Authentication").Get<Authentication>();
-            ConfigHelper.Logging = builder.Configuration.GetSection("Logging").Get<Logging>();
+            var authOpts = builder.Configuration.GetSection("Authentication").Get<Authentication>();
 
-            builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
             builder.Services.AddControllers();
-            //builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
+            builder.Services.AddSingleton<IConnectionMultiplexer>(opt => ConnectionMultiplexer.Connect("localhost:6379"));
             builder.Services.AddDbContext<ListerContext>(opt => opt.UseSqlite());
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(opt =>
+            {
+                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
+                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+            });
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
@@ -36,9 +61,9 @@ namespace Lister.WebApi
                         ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
                         ValidateAudience = true,
-                        ValidIssuer = ConfigHelper.Authentication.ValidIssuer,
-                        ValidAudience = ConfigHelper.Authentication.ValidAudience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(ConfigHelper.Authentication.SecretKey)),
+                        ValidIssuer = authOpts.ValidIssuer,
+                        ValidAudience = authOpts.ValidAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authOpts.SecretKey)),
                     };
 
                     opt.Events = new JwtBearerEvents
@@ -57,8 +82,10 @@ namespace Lister.WebApi
                     };
                 });
             builder.Services.AddAuthorization();
-            builder.Services.AddSignalR(options => options.AddFilter<DataFilter>());
+            builder.Services.AddSignalR(opt => opt.AddFilter<DataFilter>());
             builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 
             var app = builder.Build();
 
@@ -87,8 +114,8 @@ namespace Lister.WebApi
                 });
             });
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
             app.MapHub<ChatHub>("/chat");

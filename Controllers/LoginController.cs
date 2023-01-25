@@ -1,6 +1,6 @@
 using Lister.Persistence.Database;
 using Lister.WebApi.Models.Response;
-using Lister.WebApi.Utils;
+using Lister.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +13,13 @@ namespace Lister.WebApi.Controllers
     {
         private readonly ILogger<LoginController> _logger;
         private readonly ListerContext _db;
+        private readonly IJwtUtils _jwt;
 
-        public LoginController(ILogger<LoginController> logger, ListerContext db)
+        public LoginController(ILogger<LoginController> logger, ListerContext db, IJwtUtils jwt)
         {
             _logger = logger;
             _db = db;
+            _jwt= jwt;
         }
 
         [AllowAnonymous]
@@ -29,7 +31,7 @@ namespace Lister.WebApi.Controllers
             if (user == null)
                 return BadRequest("User does not exist");
 
-            return new TokenResponse(JwtUtils.CreateToken(user));
+            return new TokenResponse(_jwt.CreateToken(user));
         }
     }
 }

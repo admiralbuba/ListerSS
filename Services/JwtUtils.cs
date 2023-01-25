@@ -5,13 +5,20 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Lister.WebApi.Utils
+namespace Lister.WebApi.Services
 {
-    public class JwtUtils
+    public class JwtUtils : IJwtUtils
     {
-        public static string CreateToken(User user)
+        private readonly IConfiguration _config;
+        public JwtUtils(IConfiguration config)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(ConfigHelper.Authentication.SecretKey));
+            _config = config;
+        }
+
+        public string CreateToken(User user)
+        {
+            var auth = _config.GetSection("Authentication").Get<Authentication>();
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(auth.SecretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
 
             var claims = new List<Claim>
@@ -20,8 +27,8 @@ namespace Lister.WebApi.Utils
                 new Claim(ClaimTypes.Name, user.Name)
             };
             var jwt = new JwtSecurityToken(
-                    issuer: ConfigHelper.Authentication.ValidIssuer,
-                    audience: ConfigHelper.Authentication.ValidAudience,
+                    issuer: auth.ValidIssuer,
+                    audience: auth.ValidAudience,
                     claims: claims,
                     expires: DateTime.UtcNow.AddDays(1),
                     signingCredentials: credentials);

@@ -4,6 +4,8 @@ using Lister.Persistence.Database;
 using Lister.WebApi.Models.Request;
 using Lister.WebApi.Models.Response;
 using Lister.WebApi.SignalR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StackExchange.Redis;
@@ -13,24 +15,24 @@ namespace Lister.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GroupsController : ControllerBase
     {
         private readonly IHubContext<ChatHub, IChatHub> _chatHubContext;
         private readonly ILogger<LoginController> _logger;
-        //private readonly IConnectionMultiplexer _redis;
+        private readonly IConnectionMultiplexer _redis;
         private readonly ListerContext _db;
         private readonly IMapper _mapper;
 
         public GroupsController(ILogger<LoginController> logger, IHubContext<ChatHub,
             IChatHub> chatHubContext,
-            //IConnectionMultiplexer redis,
+            IConnectionMultiplexer redis,
             ListerContext db,
             IMapper mapper)
         {
             _logger = logger;
             _chatHubContext = chatHubContext;
-            //_redis = redis;
+            _redis = redis;
             _db = db;
             _mapper = mapper;
         }
