@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StackExchange.Redis;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace Lister.WebApi.Controllers
 {
@@ -43,10 +44,20 @@ namespace Lister.WebApi.Controllers
         {
             var users = _db.Users.Where(x => request.Users.Contains(x.Guid)).ToList();
 
-            var group = new Group() { Name = request.Name, Users = users };
+            var group = new Domain.Models.Group() { Name = request.Name, Users = users };
 
             _db.Groups.Add(group);
             await _db.SaveChangesAsync();
+
+            foreach (var user in users)
+            {
+                var connId = await _redis.GetDatabase().HashGetAsync(user.Guid.ToString(), "ConnectionId");
+                if (connId.HasValue)
+                {
+                    await _chatHubContext.Groups.AddToGroupAsync(connId, group.Name);
+                    await _chatHubContext.Clients.Groups(group.Name).Notify($"{user.Name} joined the group {group.Name}");
+                }
+            }
 
             var response = _mapper.Map<CreateGroupResponse>(group);
             return response;
