@@ -11,7 +11,7 @@ namespace Lister.WebApi.Mapping
         {
             CreateMap<Message, HubMessage>()
                 .ReverseMap();
-            CreateMap<Group, CreateGroupResponse>()
+            CreateMap<Group, CreateGroup>()
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.Users.Select(x => x.Guid).ToList()))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Guid))
                 .ReverseMap();

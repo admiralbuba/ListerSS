@@ -25,13 +25,13 @@ namespace Lister.WebApi.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("authentication")]
-        public async Task<ActionResult<TokenResponse>> Authenticate(string name)
+        public async Task<ActionResult<Token>> Authenticate(string name)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Name == name);
             if (user == null)
                 return BadRequest("User does not exist");
 
-            return new TokenResponse(_jwt.CreateToken(user));
+            return new Token(_jwt.CreateToken(user));
         }
     }
 }

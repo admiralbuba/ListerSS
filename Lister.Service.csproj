@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lister.Domain\Lister.Domain.csproj" />
-    <ProjectReference Include="..\Lister.Persistence\Lister.Persistence.csproj" />
+    <ProjectReference Include="..\Lister.Persistence\Lister.Data.csproj" />
   </ItemGroup>
 
 </Project>

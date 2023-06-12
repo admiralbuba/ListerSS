@@ -41,9 +41,9 @@ namespace Lister.WebApi.Controllers
 
         [HttpPost]
         [Route("create")]
-        public async Task<ActionResult<CreateGroupResponse>> CreateGroup(CreateGroupRequest request)
+        public async Task<ActionResult<Models.Response.CreateGroup>> CreateGroup(Models.Request.CreateGroup request)
         {
-            var users = _db.Users.Where(x => request.Users.Contains(x.Guid)).ToList();
+            var users = await _db.Users.Where(x => request.Users.Contains(x.Guid)).ToListAsync();
 
             var group = new Domain.Models.Group() { Name = request.Name, Users = users };
 
@@ -60,20 +60,20 @@ namespace Lister.WebApi.Controllers
                 }
             }
 
-            var response = _mapper.Map<CreateGroupResponse>(group);
+            var response = _mapper.Map<Models.Response.CreateGroup>(group);
             return response;
         }
 
         [HttpPatch]
         [Route("addUsers")]
-        public async Task<ActionResult<AddUsersResponse>> AddUsersToGroup(AddUsersRequest request)
+        public async Task<ActionResult<Models.Response.AddUsers>> AddUsersToGroup(Models.Request.AddUsers request)
         {
             var group = await _db.Groups.Include(x => x.Users).SingleOrDefaultAsync(x => x.Guid == request.Id);
             
             if(group == null)
                 return BadRequest("Group does not exist");
 
-            var users = _db.Users.Where(x => request.Users.Contains(x.Guid)).ToList();
+            var users = _db.Users.Where(x => request.Users.Contains(x.Guid));
             
             var newUsers = users.Except(group.Users).ToList();
 
@@ -90,7 +90,7 @@ namespace Lister.WebApi.Controllers
                 }
             }
 
-            var response = new AddUsersResponse
+            var response = new Models.Response.AddUsers
             {
                 Users = newUsers.Select(x => x.Guid).ToList(),
                 ModifiedAt = DateTime.Now

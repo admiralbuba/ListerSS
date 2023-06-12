@@ -1,10 +1,10 @@
 ﻿namespace Lister.WebApi.Models.Response
 {
-    public class TokenResponse
+    public class Token
     { 
         public string Bearer { get; set; } 
 
-        public TokenResponse(string bearer)
+        public Token(string bearer)
         {
             Bearer = bearer;
         }

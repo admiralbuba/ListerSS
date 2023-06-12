@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;   
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Text;
@@ -105,7 +105,7 @@ namespace Lister.WebApi
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null)
                     {
-                        await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse()
+                        await context.Response.WriteAsync(JsonSerializer.Serialize(new Error()
                         {
                             StatusCode = context.Response.StatusCode,
                             Message = contextFeature.Error.Message//"Internal Server Error."
